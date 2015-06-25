@@ -44,7 +44,7 @@ class Locator extends Ups
         $access = $this->createAccess();
         $request = $this->createRequest($address, $requestOption, $searchRadius, $maxSuggestion);
 
-        $this->response = $this->getRequest()->request($access, $request, $this->compileEndpointUrl(self::ENDPOINT));
+        $this->response = (new Request)->request($access, $request, $this->compileEndpointUrl(self::ENDPOINT));
         $response = $this->response->getResponse();
 
         if (null === $response) {
