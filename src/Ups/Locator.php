@@ -7,6 +7,7 @@ use Exception;
 use stdClass;
 
 use Ups\Entity\Address;
+use Ups\Entity\Radius;
 
 /**
  * Address Validation API Wrapper
@@ -30,6 +31,8 @@ class Locator extends Ups
     const REQUEST_OPTION_RETAIL_LOCATIONS_AND_ADDITIONAL_SERVICES_AND_PROGRAM_TYPE = 56;
     const REQUEST_OPTION_UPS_ACCESS_POINT = 64;
 
+
+
     /**
      * Get address suggestions from UPS
      *
@@ -39,10 +42,10 @@ class Locator extends Ups
      * @return stdClass
      * @throws Exception
      */
-    public function search(Address $address, $requestOption = self::REQUEST_OPTION_UPS_ACCESS_POINT, $searchRadius = 5, $maxSuggestion = 15)
+    public function search(Address $address, Radius $radius, $requestOption = self::REQUEST_OPTION_LOCATIONS, $maxSuggestion = 15)
     {
         $access = $this->createAccess();
-        $request = $this->createRequest($address, $requestOption, $searchRadius, $maxSuggestion);
+        $request = $this->createRequest($address, $radius, $requestOption, $maxSuggestion);
 
         $this->response = (new Request)->request($access, $request, $this->compileEndpointUrl(self::ENDPOINT));
         $response = $this->response->getResponse();
@@ -66,7 +69,7 @@ class Locator extends Ups
      *
      * @return string
      */
-    private function createRequest(Address $address, $requestOption, $searchRadius, $maxSuggestion)
+    private function createRequest(Address $address, Radius $radius, $requestOption, $maxSuggestion)
     {
         $xml = new DOMDocument();
         $xml->formatOutput = true;
@@ -83,18 +86,29 @@ class Locator extends Ups
         $request->appendChild($xml->createElement("RequestAction", "Locator"));
         $request->appendChild($xml->createElement("RequestOption", $requestOption));
 
-        $avRequest->appendChild($xml->createElement("MaximumListSize", $maxSuggestion));
 
-        $addressNode = $avRequest->appendChild($xml->createElement("OriginAddress"));
-        $addressNode->appendChild($xml->createElement("ConsigneeName", $address->getAttentionName()));
-        $addressNode->appendChild($xml->createElement("BuildingName", $address->getBuildingName()));
-        $addressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine1()));
-        $addressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine2()));
-        $addressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine3()));
-        $addressNode->appendChild($xml->createElement("PoliticalDivision2", $address->getStateProvinceCode()));
-        $addressNode->appendChild($xml->createElement("PoliticalDivision1", $address->getCity()));
-        $addressNode->appendChild($xml->createElement("CountryCode", $address->getCountryCode()));
-        $addressNode->appendChild($xml->createElement("PostcodePrimaryLow", $address->getPostalCode()));
+        $avTranslate = $avRequest->appendChild($xml->createElement("Translate", "Translate"));
+        $avTranslate->appendChild($xml->createElement("LanguageCode", "eng"));
+        $avTranslate->appendChild($xml->createElement("Local", "en-US"));
+
+        $origineAddressNode = $avRequest->appendChild($xml->createElement("OriginAddress"));
+
+        $keyAddressNode = $origineAddressNode->appendChild($xml->createElement("AddressKeyFormat"));
+        $keyAddressNode->appendChild($xml->createElement("ConsigneeName", $address->getAttentionName()));
+        $keyAddressNode->appendChild($xml->createElement("BuildingName", $address->getBuildingName()));
+        $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine1()));
+        $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine2()));
+        $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine3()));
+        $keyAddressNode->appendChild($xml->createElement("PoliticalDivision2", $address->getPoliticalDivision2()));
+        $keyAddressNode->appendChild($xml->createElement("PoliticalDivision1", $address->getPoliticalDivision1()));
+        $keyAddressNode->appendChild($xml->createElement("CountryCode", $address->getCountryCode()));
+        $keyAddressNode->appendChild($xml->createElement("PostcodePrimaryLow", $address->getPostalCode()));
+        $keyAddressNode->appendChild($xml->createElement("MaximumListSize", $maxSuggestion));
+
+        $unit = $avRequest->appendChild($xml->createElement("UnitOfMeasurement"));
+
+        $unit->appendChild($xml->createElement("Code", $radius->getUnit()));
+
 
         return $xml->saveXML();
     }
