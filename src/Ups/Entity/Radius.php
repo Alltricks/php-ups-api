@@ -48,4 +48,4 @@ class Radius
 
         return $this;
     }
-} 
+}

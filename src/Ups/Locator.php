@@ -42,10 +42,10 @@ class Locator extends Ups
      * @return stdClass
      * @throws Exception
      */
-    public function search(Address $address, Radius $radius, $requestOption = self::REQUEST_OPTION_LOCATIONS, $maxSuggestion = 15)
+    public function search(Address $address, Radius $radius, $requestOption = self::REQUEST_OPTION_LOCATIONS, $maxSuggestion = 15, $languageCode = 'eng', $local = 'en-US')
     {
         $access = $this->createAccess();
-        $request = $this->createRequest($address, $radius, $requestOption, $maxSuggestion);
+        $request = $this->createRequest($address, $radius, $requestOption, $maxSuggestion, $languageCode, $local);
 
         $this->response = (new Request)->request($access, $request, $this->compileEndpointUrl(self::ENDPOINT));
         $response = $this->response->getResponse();
@@ -69,7 +69,7 @@ class Locator extends Ups
      *
      * @return string
      */
-    private function createRequest(Address $address, Radius $radius, $requestOption, $maxSuggestion)
+    private function createRequest(Address $address, Radius $radius, $requestOption, $maxSuggestion, $languageCode, $local)
     {
         $xml = new DOMDocument();
         $xml->formatOutput = true;
@@ -88,8 +88,8 @@ class Locator extends Ups
 
 
         $avTranslate = $avRequest->appendChild($xml->createElement("Translate", "Translate"));
-        $avTranslate->appendChild($xml->createElement("LanguageCode", "eng"));
-        $avTranslate->appendChild($xml->createElement("Local", "en-US"));
+        $avTranslate->appendChild($xml->createElement("LanguageCode", $languageCode));
+        $avTranslate->appendChild($xml->createElement("Local", $local));
 
         $origineAddressNode = $avRequest->appendChild($xml->createElement("OriginAddress"));
 
@@ -121,7 +121,7 @@ class Locator extends Ups
      */
     private function formatResponse(SimpleXMLElement $response)
     {
-        return $this->convertXmlObject($response->AddressKeyFormat);
+        return $this->convertXmlObject($response->SearchResults);
     }
 
     /**
