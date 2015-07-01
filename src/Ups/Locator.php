@@ -91,6 +91,9 @@ class Locator extends Ups
         $avTranslate->appendChild($xml->createElement("LanguageCode", $languageCode));
         $avTranslate->appendChild($xml->createElement("Local", $local));
 
+        $avSearch = $avRequest->appendChild($xml->createElement("LocationSearchCriteria", "LocationSearchCriteria"));
+        $avSearch->appendChild($xml->createElement("MaximumListSize", $maxSuggestion));
+
         $origineAddressNode = $avRequest->appendChild($xml->createElement("OriginAddress"));
 
         $keyAddressNode = $origineAddressNode->appendChild($xml->createElement("AddressKeyFormat"));
