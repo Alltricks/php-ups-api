@@ -36,8 +36,8 @@ class Locator extends Ups
     /**
      * Get address suggestions from UPS
      *
-     * @param $address
-     * @param int $range
+     * @param Address $address
+     * @param Radius $range
      * @param int $maxSuggestion
      * @return stdClass
      * @throws Exception
@@ -91,17 +91,17 @@ class Locator extends Ups
         $avTranslate->appendChild($xml->createElement("LanguageCode", $languageCode));
         $avTranslate->appendChild($xml->createElement("Local", $local));
 
-        $avSearch = $avRequest->appendChild($xml->createElement("LocationSearchCriteria", "LocationSearchCriteria"));
+        $avSearch = $avRequest->appendChild($xml->createElement("LocationSearchCriteria"));
         $avSearch->appendChild($xml->createElement("MaximumListSize", $maxSuggestion));
+        $avSearch->appendChild($xml->createElement("SearchRadius", $radius->getRadius()));
 
         $origineAddressNode = $avRequest->appendChild($xml->createElement("OriginAddress"));
 
         $keyAddressNode = $origineAddressNode->appendChild($xml->createElement("AddressKeyFormat"));
-        $keyAddressNode->appendChild($xml->createElement("ConsigneeName", $address->getAttentionName()));
         $keyAddressNode->appendChild($xml->createElement("BuildingName", $address->getBuildingName()));
         $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine1()));
-        $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine2()));
-        $keyAddressNode->appendChild($xml->createElement("AddressLine", $address->getAddressLine3()));
+        $keyAddressNode->appendChild($xml->createElement("AddressLine2", $address->getAddressLine2()));
+        $keyAddressNode->appendChild($xml->createElement("AddressLine3", $address->getAddressLine3()));
         $keyAddressNode->appendChild($xml->createElement("PoliticalDivision2", $address->getPoliticalDivision2()));
         $keyAddressNode->appendChild($xml->createElement("PoliticalDivision1", $address->getPoliticalDivision1()));
         $keyAddressNode->appendChild($xml->createElement("CountryCode", $address->getCountryCode()));
